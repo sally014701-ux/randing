@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>who2meet.com — 클릭 한번이면 성공하는 팀을 만듭니다</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --glass-bg: rgba(255, 255, 255, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.8);
+      --glass-highlight: rgba(255, 255, 255, 0.9);
+      --text-primary: #1d1d1f;
+      --text-secondary: #6e6e73;
+      --accent-pink: #e87dd4;
+      --accent-purple: #9c6bdd;
+      --accent-cyan: #5eb8c4;
+      --accent-blue: #6b9bdc;
+      --iridescent-1: linear-gradient(135deg, rgba(232, 125, 212, 0.35) 0%, rgba(156, 107, 221, 0.3) 50%, rgba(94, 184, 196, 0.3) 100%);
+      --iridescent-2: linear-gradient(135deg, rgba(107, 155, 220, 0.35) 0%, rgba(232, 125, 212, 0.3) 100%);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Noto Sans KR', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #ffffff 0%, #f8f4fc 25%, #f0f4fc 50%, #fcf4f8 75%, #f5f0fc 100%);
+      min-height: 100vh;
+      color: var(--text-primary);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Glassmorphism decorative shapes - from reference image */
+    .glass-shape {
+      position: fixed;
+      pointer-events: none;
+      opacity: 0.7;
+    }
+
+    .glass-shape.circle {
+      border-radius: 50%;
+      background: var(--iridescent-1);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
+      box-shadow: 
+        inset 0 0 60px rgba(255, 255, 255, 0.4),
+        0 8px 32px rgba(156, 107, 221, 0.15);
+      border: 1px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .glass-shape.star {
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+      background: var(--iridescent-2);
+      backdrop-filter: blur(40px);
+      box-shadow: 
+        inset 0 0 40px rgba(255, 255, 255, 0.3),
+        0 8px 28px rgba(107, 155, 220, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .glass-shape.diamond {
+      transform: rotate(45deg);
+      background: linear-gradient(135deg, rgba(156, 107, 221, 0.25) 0%, rgba(94, 184, 196, 0.2) 100%);
+      backdrop-filter: blur(40px);
+      box-shadow: 
+        inset 0 0 40px rgba(255, 255, 255, 0.25),
+        0 8px 28px rgba(232, 125, 212, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .glass-shape.triangle {
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+      background: linear-gradient(135deg, rgba(232, 125, 212, 0.2) 0%, rgba(94, 184, 196, 0.15) 100%);
+      backdrop-filter: blur(40px);
+      box-shadow: inset 0 0 30px rgba(255, 255, 255, 0.2), 0 8px 28px rgba(232, 125, 212, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.5);
+    }
+
+    .shape-1 { width: 120px; height: 120px; top: 15%; right: 10%; }
+    .shape-2 { width: 80px; height: 80px; top: 25%; left: 5%; }
+    .shape-3 { width: 60px; height: 60px; bottom: 30%; right: 15%; }
+    .shape-4 { width: 90px; height: 90px; bottom: 20%; left: 8%; }
+    .shape-5 { width: 100px; height: 100px; top: 50%; left: 3%; }
+    .shape-6 { width: 70px; height: 70px; top: 70%; right: 8%; }
+    .shape-7 { width: 50px; height: 50px; top: 35%; right: 25%; }
+    .shape-8 { width: 85px; height: 85px; bottom: 40%; left: 20%; }
+
+    /* Glass card */
+    .glass-card {
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 
+        inset 0 1px 0 var(--glass-highlight),
+        0 8px 32px rgba(0, 0, 0, 0.08);
+    }
+
+    /* Header */
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      padding: 20px 48px;
+      transition: all 0.3s ease;
+    }
+
+    header.scrolled {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    nav {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.25rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      color: var(--text-primary);
+    }
+
+    .logo span {
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .nav-cta {
+      padding: 10px 24px;
+      background: var(--iridescent-1);
+      color: white !important;
+      border-radius: 980px;
+      font-weight: 600;
+      text-decoration: none;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.2s;
+    }
+
+    .nav-cta:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 30px rgba(240, 147, 251, 0.3);
+    }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 120px 24px 80px;
+    }
+
+    .hero .glass-card {
+      max-width: 720px;
+      padding: 56px 48px;
+      margin-bottom: 48px;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      padding: 8px 18px;
+      background: rgba(94, 184, 196, 0.15);
+      border: 1px solid rgba(94, 184, 196, 0.3);
+      color: var(--accent-cyan);
+      border-radius: 980px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 28px;
+      letter-spacing: -0.3px;
+    }
+
+    .hero-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 {
+      font-size: clamp(2.25rem, 5vw, 3.25rem);
+      font-weight: 700;
+      line-height: 1.25;
+      letter-spacing: -1px;
+    }
+
+    .hero-title-block {
+      margin-bottom: 48px;
+    }
+
+    .hero .hero-subtitle {
+      margin-top: 56px;
+    }
+
+    .cursor-icon {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+    }
+
+    .cursor-icon svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 4px 12px rgba(232, 125, 212, 0.35));
+      animation: cursorPulse 2s ease-in-out infinite;
+    }
+
+    @keyframes cursorPulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.9; transform: scale(1.05); }
+    }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-weight: 400;
+      margin-top: 0;
+    }
+
+    /* Sections */
+    section {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 80px 24px;
+    }
+
+    .section-label {
+      font-size: 0.875rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, var(--accent-pink), var(--accent-cyan));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-size: clamp(2rem, 4vw, 2.75rem);
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      margin-bottom: 48px;
+      line-height: 1.3;
+    }
+
+    /* Problem section */
+    .problem-intro {
+      text-align: center;
+      font-size: clamp(1.5rem, 3.5vw, 2rem);
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.5;
+      margin-bottom: 56px;
+      letter-spacing: -0.5px;
+    }
+
+    .problem-students {
+      display: flex;
+      flex-direction: column;
+      gap: 48px;
+      max-width: 720px;
+      margin: 0 auto 48px;
+    }
+
+    .problem-student-item {
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .problem-student-item:nth-child(even) {
+      flex-direction: row-reverse;
+    }
+
+    .problem-student-wrap {
+      flex-shrink: 0;
+      width: 120px;
+      height: 140px;
+    }
+
+    .problem-student-wrap svg {
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 8px 24px rgba(156, 107, 221, 0.15));
+    }
+
+    .problem-speech-bubble {
+      flex: 1;
+      min-width: 260px;
+      max-width: 400px;
+      position: relative;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+    }
+
+    .problem-speech-bubble-inner {
+      position: relative;
+      padding: 24px 28px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 22px;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 8px 32px rgba(0, 0, 0, 0.06);
+    }
+
+    .problem-speech-bubble-inner::before {
+      content: '';
+      position: absolute;
+      width: 0;
+      height: 0;
+      border-style: solid;
+    }
+
+    .problem-student-item:nth-child(1) .problem-speech-bubble-inner::before {
+      left: -20px;
+      top: 50%;
+      margin-top: -14px;
+      border-width: 14px 22px 14px 0;
+      border-color: transparent rgba(255, 255, 255, 0.92) transparent transparent;
+      filter: drop-shadow(-2px 0 4px rgba(0, 0, 0, 0.06));
+    }
+
+    .problem-student-item:nth-child(1) .problem-speech-bubble-inner {
+      margin-left: 12px;
+    }
+
+    .problem-student-item:nth-child(2) .problem-speech-bubble-inner::before {
+      right: -20px;
+      top: 50%;
+      margin-top: -14px;
+      border-width: 14px 0 14px 22px;
+      border-color: transparent transparent transparent rgba(255, 255, 255, 0.92);
+      filter: drop-shadow(2px 0 4px rgba(0, 0, 0, 0.06));
+    }
+
+    .problem-student-item:nth-child(2) .problem-speech-bubble-inner {
+      margin-right: 12px;
+    }
+
+    .problem-insight {
+      padding: 40px 48px;
+      background: linear-gradient(135deg, rgba(232, 125, 212, 0.12) 0%, rgba(94, 184, 196, 0.1) 100%);
+      border-radius: 24px;
+      border: 1px solid rgba(156, 107, 221, 0.15);
+      text-align: center;
+      backdrop-filter: blur(20px);
+    }
+
+    .problem-insight-text {
+      font-size: 1.35rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+      font-weight: 500;
+    }
+
+    .problem-insight .highlight {
+      display: inline-block;
+      padding: 2px 12px;
+      margin: 0 4px;
+      background: linear-gradient(135deg, rgba(232, 125, 212, 0.35) 0%, rgba(156, 107, 221, 0.3) 100%);
+      color: #5c3d7a;
+      font-weight: 800;
+      border-radius: 8px;
+      text-shadow: 0 2px 8px rgba(156, 107, 221, 0.25);
+      box-shadow: 0 2px 12px rgba(232, 125, 212, 0.2);
+      letter-spacing: -0.5px;
+    }
+
+    /* Solution section */
+    .solution-features {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 32px;
+    }
+
+    .feature-card {
+      padding: 40px 36px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 24px;
+      box-shadow: 
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 8px 32px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s ease;
+    }
+
+    .feature-card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(240, 147, 251, 0.3);
+      box-shadow: 0 16px 48px rgba(0, 0, 0, 0.1), 0 0 40px rgba(232, 125, 212, 0.15);
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      border-radius: 16px;
+      background: var(--iridescent-1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      box-shadow: inset 0 0 20px rgba(255, 255, 255, 0.1);
+    }
+
+    .feature-card h3 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    .feature-card p {
+      color: var(--text-secondary);
+      line-height: 1.7;
+      font-size: 0.95rem;
+    }
+
+    /* Effects section */
+    .effects-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+    }
+
+    @media (max-width: 768px) {
+      .effects-grid {
+        grid-template-columns: 1fr;
+      }
+      .hero-title-row {
+        flex-direction: column;
+      }
+      .problem-student-item,
+      .problem-student-item:nth-child(even) {
+        flex-direction: column;
+      }
+      .problem-speech-bubble {
+        min-width: 100%;
+      }
+    }
+
+    .effect-item {
+      padding: 36px 32px;
+      background: var(--glass-bg);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 20px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .effect-item:hover {
+      transform: scale(1.02);
+      border-color: rgba(94, 184, 196, 0.4);
+      box-shadow: 0 0 30px rgba(128, 222, 234, 0.1);
+    }
+
+    .effect-item .icon {
+      width: 56px;
+      height: 56px;
+      margin: 0 auto 16px;
+      border-radius: 16px;
+      background: var(--iridescent-2);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+    }
+
+    .effect-item h4 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .effect-item p {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    /* CTA section */
+    .cta-section {
+      text-align: center;
+      padding: 100px 24px;
+    }
+
+    .cta-section .glass-card {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 64px 48px;
+      background: rgba(255, 255, 255, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.8);
+    }
+
+    .cta-section h2 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .cta-section p {
+      color: var(--text-secondary);
+      margin-bottom: 32px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 16px 40px;
+      background: var(--iridescent-1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      font-weight: 600;
+      font-size: 1.1rem;
+      border-radius: 980px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .cta-button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 0 40px rgba(240, 147, 251, 0.4);
+    }
+
+    /* Footer */
+    footer {
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+    }
+
+    /* Animations */
+    .fade-in {
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    @keyframes fadeInUp {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .delay-1 { animation-delay: 0.1s; }
+    .delay-2 { animation-delay: 0.2s; }
+    .delay-3 { animation-delay: 0.3s; }
+  </style>
+</head>
+<body>
+  <!-- Glassmorphism decorative shapes from reference -->
+  <div class="glass-shape circle shape-1"></div>
+  <div class="glass-shape star shape-2"></div>
+  <div class="glass-shape circle shape-3"></div>
+  <div class="glass-shape diamond shape-4"></div>
+  <div class="glass-shape star shape-5"></div>
+  <div class="glass-shape circle shape-6"></div>
+  <div class="glass-shape diamond shape-7"></div>
+  <div class="glass-shape circle shape-8"></div>
+  <div class="glass-shape triangle" style="width: 70px; height: 70px; top: 60%; left: 12%;"></div>
+
+  <header id="header">
+    <nav>
+      <div class="logo">who2meet<span>.com</span></div>
+      <a href="#cta" class="nav-cta">시작하기</a>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="glass-card fade-in">
+        <div class="hero-badge">웹 기반 팀 빌딩 서비스</div>
+        <div class="hero-title-row">
+          <h1>클릭 한번이면</h1>
+          <span class="cursor-icon" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <linearGradient id="cursorGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:#f093fb"/>
+                  <stop offset="50%" style="stop-color:#b388ff"/>
+                  <stop offset="100%" style="stop-color:#80deea"/>
+                </linearGradient>
+              </defs>
+              <path d="M8 8L8 36L18 26L26 40L32 38L24 24L36 24L8 8Z" fill="url(#cursorGrad)" fill-opacity="0.9"/>
+              <path d="M8 8L8 36L18 26L26 40L32 38L24 24L36 24L8 8Z" fill="none" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+          </span>
+        </div>
+        <h1>성공하는 팀을 만듭니다</h1>
+        <p class="hero-subtitle">랜덤 배정이 아닌,<br>역할과 관심사 기반의 스마트 매칭으로<br>협업 효율을 극대화하세요</p>
+      </div>
+    </section>
+
+    <section id="problem" class="fade-in delay-1">
+      <h2 class="problem-intro">다가오는 1학기,<br>팀플 수업이 걱정이신가요?</h2>
+
+      <div class="problem-students">
+        <div class="problem-student-item">
+          <div class="problem-student-wrap">
+            <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="고민하는 대학생">
+              <defs>
+                <linearGradient id="skin1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#F0DDCC"/>
+                  <stop offset="100%" stop-color="#E0C9B0"/>
+                </linearGradient>
+                <linearGradient id="gown1" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#5a5a5c"/>
+                  <stop offset="100%" stop-color="#3d3d40"/>
+                </linearGradient>
+              </defs>
+              <path d="M28 52 Q50 48 72 52 L72 88 Q50 92 28 88 Z" fill="url(#gown1)"/>
+              <path d="M30 50 Q50 44 70 50" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <ellipse cx="50" cy="32" rx="20" ry="22" fill="url(#skin1)"/>
+              <circle cx="42" cy="30" r="2" fill="#2a2a2a"/>
+              <circle cx="58" cy="30" r="2" fill="#2a2a2a"/>
+              <circle cx="50" cy="36" r="1.5" fill="#e8a090"/>
+              <path d="M44 42 Q50 46 56 42" stroke="#2a2a2a" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              <path d="M38 26 Q41 29 44 26" stroke="#2a2a2a" stroke-width="0.8" stroke-linecap="round"/>
+              <path d="M56 26 Q59 29 62 26" stroke="#2a2a2a" stroke-width="0.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="problem-speech-bubble">
+            <div class="problem-speech-bubble-inner">팀원들끼리 관심사가 다른 바람에 주제를 하나로 결정하는 게 힘들었어요</div>
+          </div>
+        </div>
+        <div class="problem-student-item">
+          <div class="problem-student-wrap">
+            <svg viewBox="0 0 100 90" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="고민하는 대학생">
+              <defs>
+                <linearGradient id="skin2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#F5E6D8"/>
+                  <stop offset="100%" stop-color="#E8D4C4"/>
+                </linearGradient>
+                <linearGradient id="gown2" x1="0%" y1="0%" x2="0%" y2="100%">
+                  <stop offset="0%" stop-color="#5a5a5c"/>
+                  <stop offset="100%" stop-color="#3d3d40"/>
+                </linearGradient>
+              </defs>
+              <path d="M28 52 Q50 48 72 52 L72 88 Q50 92 28 88 Z" fill="url(#gown2)"/>
+              <path d="M30 50 Q50 44 70 50" stroke="#fff" stroke-width="6" fill="none" stroke-linecap="round"/>
+              <ellipse cx="50" cy="32" rx="20" ry="22" fill="url(#skin2)"/>
+              <circle cx="42" cy="30" r="2" fill="#2a2a2a"/>
+              <circle cx="58" cy="30" r="2" fill="#2a2a2a"/>
+              <circle cx="50" cy="36" r="1.5" fill="#e8a090"/>
+              <path d="M44 42 Q50 46 56 42" stroke="#2a2a2a" stroke-width="1.2" stroke-linecap="round" fill="none"/>
+              <path d="M38 26 Q41 29 44 26" stroke="#2a2a2a" stroke-width="0.8" stroke-linecap="round"/>
+              <path d="M56 26 Q59 29 62 26" stroke="#2a2a2a" stroke-width="0.8" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="problem-speech-bubble">
+            <div class="problem-speech-bubble-inner">아무도 의견 제시를 안해서 아이디에이션하는데 시간이 오래 걸렸어요</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="problem-insight">
+        <p class="problem-insight-text">팀플 실패의 원인은<br>사람이 아니라 <span class="highlight">매칭 방식</span></p>
+      </div>
+    </section>
+
+    <section id="solution" class="fade-in delay-2">
+      <div class="section-label">솔루션</div>
+      <h2 class="section-title">성공하는 팀을 만드는<br>스마트 팀 빌딩</h2>
+
+      <div class="solution-features">
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>역할 기반 매칭</h3>
+          <p>각자가 잘할 수 있는 역할을 1순위, 2순위로 설정하면 시스템이 균형 잡힌 팀을 구성해 드립니다.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🏷️</div>
+          <h3>키워드 매칭</h3>
+          <p>개인이 설정한 키워드나 조교가 제시한 키워드 중 여러 개를 선택하여 같은 분야에 관심 있는 팀원과 매칭됩니다.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="effects" class="fade-in delay-3">
+      <div class="section-label">기대 효과</div>
+      <h2 class="section-title">균형 잡힌 팀,<br>높아지는 협업 효율</h2>
+
+      <div class="effects-grid">
+        <div class="effect-item">
+          <div class="icon">⚖️</div>
+          <h4>역할 분배의 균형</h4>
+          <p>각자의 강점에 맞는 역할이 자동으로 배정되어 갈등 없는 협업이 가능합니다</p>
+        </div>
+        <div class="effect-item">
+          <div class="icon">💡</div>
+          <h4>관심사 기반 팀</h4>
+          <p>같은 분야에 관심을 가진 팀원들로 구성되어 아이디어가 자연스럽게 쏟아집니다</p>
+        </div>
+        <div class="effect-item">
+          <div class="icon">📈</div>
+          <h4>협업 효율 극대화</h4>
+          <p>역할 균등과 관심사 일치를 통해 프로젝트 진행 속도와 품질이 함께 향상됩니다</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta" class="cta-section fade-in">
+      <div class="glass-card">
+        <h2>지금 바로 시작하세요</h2>
+        <p>who2meet.com과 함께 성공하는 팀을 만들어 보세요</p>
+        <a href="#" class="cta-button">무료로 시작하기</a>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 who2meet.com. 클릭 한번이면 성공하는 팀을 만듭니다.
+  </footer>
+
+  <script>
+    const header = document.getElementById('header');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('section').forEach(section => observer.observe(section));
+  </script>
+</body>
+</html>
